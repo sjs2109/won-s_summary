@@ -1,13 +1,14 @@
 
 import sys
-
 import pdfminer.settings
 pdfminer.settings.STRICT = False
 import pdfminer.high_level
 import pdfminer.layout
 from pdfminer.image import ImageWriter
 import os
-
+from konlpy.tag import Hannanum
+import re
+import collections
 
 
 def extract_text(files=[], outfile='-',
@@ -79,16 +80,47 @@ def search(dirname):
 
 def main(args=None):
 
+    print("Load pdf files...")
     outfp = extract_text(files= search("./sample_pdf") , outfile="temp.txt")
     outfp.close()
 
+    print("Load data...")
     f= open("temp.txt")
     elements = f.readlines()
     elements = [x for x in elements if x != "\n"]
     elements = [x.rstrip() for x in elements]
 
+    hannanum = Hannanum()
+    korean_list = []
+    korean_noun_list = []
+    english_list = []
 
-    print(elements)
+    korean = re.compile('[^ ㄱ-ㅣ가-힣]+')
 
+    for element in elements:
+        korean_list.append(korean.sub("",element))
+
+    korean_list = [x.strip() for x in korean_list]
+    korean_list = [x for x in korean_list if x != '']
+
+    print("Parsing Korean words...")
+    for korean in korean_list:
+        korean_noun_list += hannanum.nouns(korean)
+
+    print("Korean list : ",korean_noun_list)
+
+    print("Parsing English words...")
+    for element in elements:
+        english_list.append(re.sub('[^a-zA-Z]','',element))
+
+    english_list = [x.strip() for x in english_list]
+    english_list = [x for x in english_list if x != '']
+    print("English list : ", english_list)
+
+    korean_counter = collections.Counter(korean_noun_list)
+    print("Most 3 word in Korean words:", korean_counter.most_common(3))
+
+    english_counter = collections.Counter(english_list)
+    print("Most 3 word in English words:", english_counter.most_common(3))
 
 if __name__ == '__main__': sys.exit(main())
