@@ -10,6 +10,9 @@ from konlpy.tag import Hannanum
 import re
 import collections
 
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
 
 def extract_text(files=[], outfile='-',
             _py2_no_more_posargs=None,  # Bloody Python2 needs a shim
@@ -78,14 +81,32 @@ def search(dirname):
 
     return filelist
 
+def draw_word_cloud(list,name):
+    # convert list to string and generate
+    unique_string = (" ").join(list)
+
+    wordcloud = WordCloud(font_path="C:\Windows\Fonts\malgun.ttf", width=1000, height=500).generate(unique_string)
+    plt.figure(figsize=(15, 8))
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.savefig(name+".png")
+    plt.show()
+    plt.close()
+
 def main(args=None):
 
-    print("Load pdf files...")
+    print("Loading pdf files...")
+    try:
+        os.remove("temp.txt")
+        os.remove("Korean.png")
+        os.remove("English.png")
+    except PermissionError:
+        pass
     outfp = extract_text(files= search("./sample_pdf") , outfile="temp.txt")
     outfp.close()
 
-    print("Load data...")
-    f= open("temp.txt")
+    print("Loading data...")
+    f= open("temp.txt", encoding='UTF8')
     elements = f.readlines()
     elements = [x for x in elements if x != "\n"]
     elements = [x.rstrip() for x in elements]
@@ -118,9 +139,13 @@ def main(args=None):
     print("English list : ", english_list)
 
     korean_counter = collections.Counter(korean_noun_list)
-    print("Most 3 word in Korean words:", korean_counter.most_common(3))
+    print("Most 10 word in Korean words:", korean_counter.most_common(10))
 
     english_counter = collections.Counter(english_list)
-    print("Most 3 word in English words:", english_counter.most_common(3))
+    print("Most 10 word in English words:", english_counter.most_common(10))
+
+    draw_word_cloud(korean_noun_list,"Korean")
+    draw_word_cloud(english_list,"English")
+    print("Done")
 
 if __name__ == '__main__': sys.exit(main())
