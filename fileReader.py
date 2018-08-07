@@ -96,12 +96,7 @@ def draw_word_cloud(list,name):
 def main(args=None):
 
     print("Loading pdf files...")
-    try:
-        os.remove("temp.txt")
-        os.remove("Korean.png")
-        os.remove("English.png")
-    except PermissionError:
-        pass
+   
     outfp = extract_text(files= search("./sample_pdf") , outfile="temp.txt")
     outfp.close()
 
