@@ -96,7 +96,7 @@ def draw_word_cloud(list,name):
 def main(args=None):
 
     print("Loading pdf files...")
-   
+
     outfp = extract_text(files= search("./sample_pdf") , outfile="temp.txt")
     outfp.close()
 
@@ -119,10 +119,12 @@ def main(args=None):
     korean_list = [x.strip() for x in korean_list]
     korean_list = [x for x in korean_list if x != '']
 
+
     print("Parsing Korean words...")
     for korean in korean_list:
         korean_noun_list += hannanum.nouns(korean)
 
+    korean_noun_list = [x for x in korean_noun_list if len(x) > 1]
     print("Korean list : ",korean_noun_list)
 
     print("Parsing English words...")
